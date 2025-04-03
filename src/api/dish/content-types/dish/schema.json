@@ -1,0 +1,48 @@
+{
+  "kind": "collectionType",
+  "collectionName": "dishes",
+  "info": {
+    "singularName": "dish",
+    "pluralName": "dishes",
+    "displayName": "Dish",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "Name": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "Price": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
+    },
+    "Type": {
+      "type": "enumeration",
+      "enum": [
+        "First",
+        "MainCourse",
+        "Dessert"
+      ],
+      "required": true
+    },
+    "Photo": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files"
+      ]
+    },
+    "Allergens": {
+      "type": "component",
+      "repeatable": true,
+      "component": "allergens.allergens"
+    }
+  }
+}

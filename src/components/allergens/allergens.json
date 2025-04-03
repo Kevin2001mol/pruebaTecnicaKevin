@@ -1,0 +1,26 @@
+{
+  "collectionName": "components_allergens_allergens",
+  "info": {
+    "displayName": "Allergens",
+    "icon": "information"
+  },
+  "options": {},
+  "attributes": {
+    "Name": {
+      "type": "string",
+      "required": true
+    },
+    "Description": {
+      "type": "text",
+      "required": false
+    },
+    "Icon": {
+      "allowedTypes": [
+        "images",
+        "files"
+      ],
+      "type": "media",
+      "multiple": true
+    }
+  }
+}
