@@ -4,4 +4,8 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 const strapi_1 = require("@strapi/strapi");
-exports.default = strapi_1.factories.createCoreController('api::daily-menu.daily-menu');
+const DAILYSERVE = "api::daily-menu.daily-menu";
+exports.default = strapi_1.factories.createCoreController(DAILYSERVE, () => ({
+    async lessAllergens(ctx) {
+    },
+}));

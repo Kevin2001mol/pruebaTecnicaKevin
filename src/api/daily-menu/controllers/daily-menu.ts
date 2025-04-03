@@ -2,6 +2,13 @@
  * daily-menu controller
  */
 
-import { factories } from '@strapi/strapi'
+import { factories } from "@strapi/strapi";
+const DAILYSERVE = "api::daily-menu.daily-menu";
+export default factories.createCoreController(DAILYSERVE, () => ({
+  async lessAllergens(ctx) {
 
-export default factories.createCoreController('api::daily-menu.daily-menu');
+
+
+    
+  },
+}));
