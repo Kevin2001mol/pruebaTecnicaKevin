@@ -1,7 +1,7 @@
 "use strict";
 /**
  * daily-menu service
-*/
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 const strapi_1 = require("@strapi/strapi");
 const DAILY_MENU_SERVE = "api::daily-menu.daily-menu";
@@ -22,6 +22,9 @@ exports.default = strapi_1.factories.createCoreService(DAILY_MENU_SERVE, () => (
         }
         return first_dish + second_dish + third_dish;
     },
-    async addTaxes(dishes) {
-    }
+    async addTaxes(ctx) {
+        const TAXES = 1.21;
+        const { Price } = ctx;
+        return (Price * TAXES).toFixed(2);
+    },
 }));

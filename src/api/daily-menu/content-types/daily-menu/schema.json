@@ -4,7 +4,8 @@
   "info": {
     "singularName": "daily-menu",
     "pluralName": "daily-menus",
-    "displayName": "DailyMenu"
+    "displayName": "DailyMenu",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -37,6 +38,9 @@
     "TotalPriceDishes": {
       "type": "decimal",
       "required": false
+    },
+    "PriceTaxes": {
+      "type": "decimal"
     }
   }
 }

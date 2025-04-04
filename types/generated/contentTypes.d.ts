@@ -372,6 +372,7 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
 export interface ApiDailyMenuDailyMenu extends Struct.CollectionTypeSchema {
   collectionName: 'daily_menus';
   info: {
+    description: '';
     displayName: 'DailyMenu';
     pluralName: 'daily-menus';
     singularName: 'daily-menu';
@@ -401,6 +402,7 @@ export interface ApiDailyMenuDailyMenu extends Struct.CollectionTypeSchema {
         },
         number
       >;
+    PriceTaxes: Schema.Attribute.Decimal;
     publishedAt: Schema.Attribute.DateTime;
     TotalPriceDishes: Schema.Attribute.Decimal;
     updatedAt: Schema.Attribute.DateTime;
