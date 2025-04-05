@@ -7,7 +7,7 @@ const DAILY_MENU_SERVE = "api::daily-menu.daily-menu";
 
 export default factories.createCoreService(DAILY_MENU_SERVE, () => ({
   async showPrices(ctx) {
-    
+    //controlar que ctx no sea null
     const { First, MainCourse, Dessert } = ctx;
     let first_dish = 0;
     let second_dish = 0;
@@ -25,6 +25,8 @@ export default factories.createCoreService(DAILY_MENU_SERVE, () => ({
     return first_dish + second_dish + third_dish;
   },
   async addTaxes(ctx) {
+    //controlar que ctx no sea null
+    //controlar que price no sea null
     const TAXES= 1.21;
     const { Price } = ctx;
 

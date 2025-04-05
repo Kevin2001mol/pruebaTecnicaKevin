@@ -14,7 +14,7 @@ export default factories.createCoreController(DAILYSERVE, () => ({
     }
 
     const namesArray = Name.split(",").map((name) => name.trim());
-
+    //convertir en funcion obtainDishes();
     const dailyMenus = await strapi.documents(DAILYSERVE).findMany({
       populate: {
         First: {
@@ -34,7 +34,7 @@ export default factories.createCoreController(DAILYSERVE, () => ({
         },
       },
     });
-
+    // hacer funcion menuFilter()
     const filteredMenus = dailyMenus.filter((menu) => {
       const dishHasProhibitedAllergen = (dish) => {
         if (!dish) return false;
@@ -50,10 +50,11 @@ export default factories.createCoreController(DAILYSERVE, () => ({
 
       return !firstHas && !mainCourseHas && !dessertHas;
     });
-
+    //hasta aqui diria 
     return ctx.send(filteredMenus);
   },
   async mostPopulars(ctx) {
+    // otra funcion nameDishes()
     const collections = await strapi.documents(DAILYSERVE).findMany({
       populate: {
         First: {
@@ -67,6 +68,7 @@ export default factories.createCoreController(DAILYSERVE, () => ({
         },
       },
     });
+    //va metiendo counts es un mapa y hacerlo en funcion tmbn  countDishes()
     const dishCountMap = new Map();
     for (let i = 0; i < collections.length; i++) {
       const menu = collections[i];
@@ -83,57 +85,11 @@ export default factories.createCoreController(DAILYSERVE, () => ({
         dishCountMap.set(dishName, (dishCountMap.get(dishName) || 0) + 1);
       }
     }
+    // funcion para ordenar e intentar simplificarla dishesSorter();
     const sortedDishes = Array.from(dishCountMap.entries())
       .sort((a, b) => b[1] - a[1])//ORDEN DE MAYOR A MENOR(SI LA RESTA DA NEGATIVO , LO ORDENA A LA INVERSD Y SI NO ASI )
       .map(([name, count]) => ({ name, count }));//CONVERTIR EN OBJ CON ATT DE NOMBRE Y CONTADOR 
     return { popularDishes: sortedDishes };
   },
-  /*
-  const api='api::daily-menu.daily-menu'
- 
-try {
- 
-const collections = await strapi.documents(api).findMany({
-populate: {
-first_dish: {
-fields: ['name']
-},
-second_dish: {
-fields: ['name']
-},
-dessert_dish: {
-fields: ['name']
-}
-}
-});
- 
-const dishCountMap = new Map();
-for (let i = 0; i < collections.length; i++) {
-const menu = collections[i];
-if (menu.first_dish && menu.first_dish.name) {
-const dishName = menu.first_dish.name;
-dishCountMap.set(dishName, (dishCountMap.get(dishName) || 0) + 1);
-}
-if (menu.second_dish && menu.second_dish.name) {
-const dishName = menu.second_dish.name;
-dishCountMap.set(dishName, (dishCountMap.get(dishName) || 0) + 1);
-}
-if (menu.dessert_dish && menu.dessert_dish.name) {
-const dishName = menu.dessert_dish.name;
-dishCountMap.set(dishName, (dishCountMap.get(dishName) || 0) + 1);
-}
-}
-const sortedDishes = Array.from(dishCountMap.entries())
-.sort((a, b) => b[1] - a[1])
-.map(([name, count]) => ({ name, count }));
-return { popularDishes: sortedDishes };
 
-
-} catch (error) {
-ctx.throw("Not found Dishes :", error);
-}
-},
-  
-  
-  */
 }));
