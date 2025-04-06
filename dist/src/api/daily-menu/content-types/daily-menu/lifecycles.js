@@ -83,20 +83,46 @@ module.exports = {
     },
     async beforeCreate(event) {
         const { params } = event;
-        const validCategory = await strapi
-            .service(DAYLE_SERVE)
-            .validateCategory(params);
-        if (!validCategory) {
-            throw new ApplicationError("This plate is not in the correct type");
+        const validCategory = await strapi.service(DAYLE_SERVE).validateCategory(params);
+        if (!validCategory.isValid) {
+            let errorMessage = "";
+            switch (validCategory.errorCode) {
+                case 1:
+                    errorMessage = "Warning! The first dish is not in its category.";
+                    break;
+                case 2:
+                    errorMessage = "Warning! The main course is not in its category.";
+                    break;
+                case 3:
+                    errorMessage = "Warning! The dessert is not in its category.";
+                    break;
+                default:
+                    errorMessage = "Warning! There is a dish that is not in its category.";
+                    break;
+            }
+            throw new ApplicationError(errorMessage);
         }
     },
     async beforeUpdate(event) {
         const { params } = event;
-        const validCategory = await strapi
-            .service(DAYLE_SERVE)
-            .validateCategory(params);
-        if (!validCategory) {
-            throw new ApplicationError("This plate is not in the correct type");
+        const validCategory = await strapi.service(DAYLE_SERVE).validateCategory(params);
+        if (!validCategory.isValid) {
+            let errorMessage = "";
+            switch (validCategory.errorCode) {
+                case 1:
+                    errorMessage = "Warning! The first dish is not in its category.";
+                    break;
+                case 2:
+                    errorMessage = "Warning! The main course is not in its category.";
+                    break;
+                case 3:
+                    errorMessage = "Warning! The dessert is not in its category.";
+                    break;
+                default:
+                    errorMessage = "Warning! There is a dish that is not in its category.";
+                    break;
+            }
+            throw new ApplicationError(errorMessage);
         }
     },
 };

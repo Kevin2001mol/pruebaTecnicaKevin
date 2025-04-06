@@ -5,7 +5,6 @@ module.exports = {
   async afterCreate(event) {
     if (event.state?.isCalculatedUpdate) return;
     const { result } = event;
-
     const dishes = await strapi.documents(DAYLE_SERVE).findOne({
       documentId: result.documentId,
       populate: { First: true, MainCourse: true, Dessert: true },
@@ -13,10 +12,8 @@ module.exports = {
     const { TotalPriceDishes, documentId, PriceTaxes } = dishes;
     const sumPrice = await strapi.service(DAYLE_SERVE).showPrices(dishes);
     const price_with_taxes = await strapi.service(DAYLE_SERVE).addTaxes(dishes);
-
     const currentPrice = TotalPriceDishes ?? 0;
     const calculatedPrice = sumPrice ?? 0;
-
     if (currentPrice.toFixed(2) !== calculatedPrice.toFixed(2)) {
       await strapi.documents(DAYLE_SERVE).update({
         documentId,
@@ -24,7 +21,6 @@ module.exports = {
         state: { isCalculatedUpdate: true },
       });
     }
-
     const currentTaxes =
       typeof PriceTaxes === "number" ? PriceTaxes : parseFloat(PriceTaxes) || 0;
     const calculatedTaxes =
@@ -39,7 +35,6 @@ module.exports = {
       });
     }
   },
-
   async afterUpdate(event) {
     if (event.state.isCalculatedUpdate) return;
 
@@ -101,19 +96,49 @@ module.exports = {
     const validCategory = await strapi
       .service(DAYLE_SERVE)
       .validateCategory(params);
-    if (!validCategory) {
-      throw new ApplicationError("This plate is not in the correct type");
+    if (!validCategory.isValid) {
+      let errorMessage = "";
+      switch (validCategory.errorCode) {
+        case 1:
+          errorMessage = "Warning! The first dish is not in its category.";
+          break;
+        case 2:
+          errorMessage = "Warning! The main course is not in its category.";
+          break;
+        case 3:
+          errorMessage = "Warning! The dessert is not in its category.";
+          break;
+        default:
+          errorMessage =
+            "Warning! There is a dish that is not in its category.";
+          break;
+      }
+      throw new ApplicationError(errorMessage);
     }
   },
   async beforeUpdate(event) {
     const { params } = event;
-
     const validCategory = await strapi
       .service(DAYLE_SERVE)
       .validateCategory(params);
-
-    if (!validCategory) {
-      throw new ApplicationError("This plate is not in the correct type");
+    if (!validCategory.isValid) {
+      let errorMessage = "";
+      switch (validCategory.errorCode) {
+        case 1:
+          errorMessage = "Warning! The first dish is not in its category.";
+          break;
+        case 2:
+          errorMessage = "Warning! The main course is not in its category.";
+          break;
+        case 3:
+          errorMessage = "Warning! The dessert is not in its category.";
+          break;
+        default:
+          errorMessage =
+            "Warning! There is a dish that is not in its category.";
+          break;
+      }
+      throw new ApplicationError(errorMessage);
     }
   },
 };

@@ -29,29 +29,26 @@ exports.default = strapi_1.factories.createCoreService(DAILY_MENU_SERVE, () => (
         return (Price * TAXES).toFixed(2);
     },
     async validateCategory(params) {
-        const checkDishCategory = async (dishData, categoryType) => {
-            if (dishData &&
-                Array.isArray(dishData.connect) &&
-                dishData.connect.length > 0) {
-                const dish = await strapi.db.query(PLATE_SERVE).findOne({
-                    where: { id: dishData.connect.map((item) => item.id) },
-                });
-                return dish.Type === categoryType;
-            }
-            return true;
-        };
-        const isValidFirst = await checkDishCategory(params.data.First, "First");
-        if (!isValidFirst)
-            return false;
-        const isValidSecond = await checkDishCategory(params.data.MainCourse, "MainCourse");
-        if (!isValidSecond)
-            return false;
-        const isValidDessert = await checkDishCategory(params.data.Dessert, "Dessert");
-        if (!isValidDessert) {
-            return false;
-        }
-        else {
-            return true;
-        }
+        const validateFirst = await checkDishCategory(params.data.First, "First");
+        if (!validateFirst)
+            return { isValid: false, errorCode: 1 };
+        const validateSecond = await checkDishCategory(params.data.MainCourse, "MainCourse");
+        if (!validateSecond)
+            return { isValid: false, errorCode: 2 };
+        const validateDessert = await checkDishCategory(params.data.Dessert, "Dessert");
+        if (!validateDessert)
+            return { isValid: false, errorCode: 3 };
+        return { isValid: true, errorCode: 0 };
     },
 }));
+const checkDishCategory = async (dishData, categoryType) => {
+    if (dishData &&
+        Array.isArray(dishData.connect) &&
+        dishData.connect.length > 0) {
+        const dish = await strapi.db.query(PLATE_SERVE).findOne({
+            where: { id: dishData.connect.map((item) => item.id) },
+        });
+        return dish.Type === categoryType;
+    }
+    return true;
+};

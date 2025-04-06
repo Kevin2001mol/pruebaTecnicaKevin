@@ -24,39 +24,40 @@ export default factories.createCoreService(DAILY_MENU_SERVE, () => ({
     return first_dish + second_dish + third_dish;
   },
   async addTaxes(ctx) {
-    const TAXES= 1.21;
+    const TAXES = 1.21;
     const { Price } = ctx;
 
     return (Price * TAXES).toFixed(2);
   },
   async validateCategory(params) {
-    const checkDishCategory = async (dishData, categoryType) => {
-      if (
-        dishData &&
-        Array.isArray(dishData.connect) &&
-        dishData.connect.length > 0
-      ) {
-        const dish = await strapi.db.query(PLATE_SERVE).findOne({
-          where: { id: dishData.connect.map((item) => item.id) },
-        });
-        return dish.Type === categoryType;
-      }
-      return true;
-    };
+    const validateFirst = await checkDishCategory(params.data.First, "First");
+    if (!validateFirst) return { isValid: false, errorCode: 1 };
 
-    const isValidFirst = await checkDishCategory(params.data.First, "First");
-    if (!isValidFirst) return false;
+    const validateSecond = await checkDishCategory(
+      params.data.MainCourse,
+      "MainCourse"
+    );
+    if (!validateSecond) return { isValid: false, errorCode: 2 };
 
-    const isValidSecond = await checkDishCategory(params.data.MainCourse, "MainCourse");
-    if (!isValidSecond) return false;
-
-    const isValidDessert = await checkDishCategory(
+    const validateDessert = await checkDishCategory(
       params.data.Dessert,
       "Dessert"
     );
+    if (!validateDessert) return { isValid: false, errorCode: 3 };
 
-    if (!isValidDessert){return false;}else{
-      return true;
-    }
+    return { isValid: true, errorCode: 0 };
   },
 }));
+const checkDishCategory = async (dishData, categoryType) => {
+  if (
+    dishData &&
+    Array.isArray(dishData.connect) &&
+    dishData.connect.length > 0
+  ) {
+    const dish = await strapi.db.query(PLATE_SERVE).findOne({
+      where: { id: dishData.connect.map((item) => item.id) },
+    });
+    return dish.Type === categoryType;
+  }
+  return true;
+};
