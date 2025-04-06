@@ -28,6 +28,32 @@ exports.default = strapi_1.factories.createCoreService(DAILY_MENU_SERVE, () => (
         const { Price } = ctx;
         return (Price * TAXES).toFixed(2);
     },
+    checkPublishAction(event) {
+        if (event.params.data && event.params.data.publishedAt) {
+            throw new ApplicationError("Publish action detected, skipping calculated update in afterUpdate.");
+        }
+    },
+    checkDishInformation(dishes) {
+        if (!dishes.First || !dishes.MainCourse || !dishes.Dessert) {
+            throw new ApplicationError("Missing dish information in menu, skipping calculated update.");
+        }
+    },
+    async updateFieldIfDifferent(documentId, fieldName, currentValue, newValue) {
+        if (currentValue.toFixed(2) !== newValue.toFixed(2)) {
+            try {
+                const data = {};
+                data[fieldName] = newValue;
+                await strapi.documents(DAILY_MENU_SERVE).update({
+                    documentId,
+                    data,
+                    state: { isCalculatedUpdate: true },
+                });
+            }
+            catch (error) {
+                throw new ApplicationError(`Error updating ${fieldName}: ${error.message}`);
+            }
+        }
+    },
     async validateCategory(params) {
         const validateFirst = await checkDishCategory(params.data.First, "First");
         if (!validateFirst)

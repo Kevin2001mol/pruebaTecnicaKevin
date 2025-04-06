@@ -16,114 +16,55 @@ module.exports = {
         const price_with_taxes = await strapi.service(DAYLE_SERVE).addTaxes(dishes);
         const currentPrice = TotalPriceDishes !== null && TotalPriceDishes !== void 0 ? TotalPriceDishes : 0;
         const calculatedPrice = sumPrice !== null && sumPrice !== void 0 ? sumPrice : 0;
-        if (currentPrice.toFixed(2) !== calculatedPrice.toFixed(2)) {
-            await strapi.documents(DAYLE_SERVE).update({
-                documentId,
-                data: { TotalPriceDishes: sumPrice },
-                state: { isCalculatedUpdate: true },
-            });
-        }
+        await strapi
+            .service(DAYLE_SERVE)
+            .updateFieldIfDifferent(documentId, "TotalPriceDishes", currentPrice, calculatedPrice);
         const currentTaxes = typeof PriceTaxes === "number" ? PriceTaxes : parseFloat(PriceTaxes) || 0;
         const calculatedTaxes = typeof price_with_taxes === "number"
             ? price_with_taxes
             : parseFloat(price_with_taxes) || 0;
-        if (currentTaxes.toFixed(2) !== calculatedTaxes.toFixed(2)) {
-            await strapi.documents(DAYLE_SERVE).update({
-                documentId,
-                data: { PriceTaxes: price_with_taxes },
-                state: { isCalculatedUpdate: true },
-            });
-        }
+        await strapi
+            .service(DAYLE_SERVE)
+            .updateFieldIfDifferent(documentId, "PriceTaxes", currentTaxes, calculatedTaxes);
     },
     async afterUpdate(event) {
-        if (event.state.isCalculatedUpdate)
+        var _a;
+        if ((_a = event.state) === null || _a === void 0 ? void 0 : _a.isCalculatedUpdate)
             return;
-        if (event.params.data && event.params.data.publishedAt) {
-            throw new ApplicationError("Publish action detected, skipping calculated update in afterUpdate.");
-        }
+        await strapi.service(DAYLE_SERVE).checkPublishAction(event);
         const { result } = event;
         const dishes = await strapi.documents(DAYLE_SERVE).findOne({
             documentId: result.documentId,
             populate: { First: true, MainCourse: true, Dessert: true },
         });
-        if (!dishes.First || !dishes.MainCourse || !dishes.Dessert) {
-            throw new ApplicationError("Missing dish information in menu, skipping calculated update.");
-        }
+        await strapi.service(DAYLE_SERVE).checkDishInformation(dishes);
         const { TotalPriceDishes, documentId, PriceTaxes } = dishes;
         const sumPrice = await strapi.service(DAYLE_SERVE).showPrices(dishes);
-        if (TotalPriceDishes.toFixed(2) !== sumPrice.toFixed(2)) {
-            try {
-                await strapi.documents(DAYLE_SERVE).update({
-                    documentId,
-                    data: { TotalPriceDishes: sumPrice },
-                    state: { isCalculatedUpdate: true },
-                });
-            }
-            catch (error) {
-                throw new ApplicationError("Error updating TotalPriceDishes:");
-            }
-        }
+        await strapi
+            .service(DAYLE_SERVE)
+            .updateFieldIfDifferent(documentId, "TotalPriceDishes", TotalPriceDishes, sumPrice);
         const price_with_taxes = await strapi.service(DAYLE_SERVE).addTaxes(dishes);
         const currentTaxes = typeof PriceTaxes === "number" ? PriceTaxes : parseFloat(PriceTaxes) || 0;
         const calculatedTaxes = typeof price_with_taxes === "number"
             ? price_with_taxes
             : parseFloat(price_with_taxes) || 0;
-        if (currentTaxes.toFixed(2) !== calculatedTaxes.toFixed(2)) {
-            try {
-                await strapi.documents(DAYLE_SERVE).update({
-                    documentId,
-                    data: { PriceTaxes: price_with_taxes },
-                    state: { isCalculatedUpdate: true },
-                });
-            }
-            catch (error) {
-                throw new ApplicationError("Error updating PriceTaxes:");
-            }
-        }
+        await strapi
+            .service(DAYLE_SERVE)
+            .updateFieldIfDifferent(documentId, "PriceTaxes", currentTaxes, calculatedTaxes);
     },
     async beforeCreate(event) {
         const { params } = event;
-        const validCategory = await strapi.service(DAYLE_SERVE).validateCategory(params);
-        if (!validCategory.isValid) {
-            let errorMessage = "";
-            switch (validCategory.errorCode) {
-                case 1:
-                    errorMessage = "Warning! The first dish is not in its category.";
-                    break;
-                case 2:
-                    errorMessage = "Warning! The main course is not in its category.";
-                    break;
-                case 3:
-                    errorMessage = "Warning! The dessert is not in its category.";
-                    break;
-                default:
-                    errorMessage = "Warning! There is a dish that is not in its category.";
-                    break;
-            }
-            throw new ApplicationError(errorMessage);
-        }
+        const validCategory = await strapi
+            .service(DAYLE_SERVE)
+            .validateCategory(params);
+        handleCategoryError(validCategory);
     },
     async beforeUpdate(event) {
         const { params } = event;
-        const validCategory = await strapi.service(DAYLE_SERVE).validateCategory(params);
-        if (!validCategory.isValid) {
-            let errorMessage = "";
-            switch (validCategory.errorCode) {
-                case 1:
-                    errorMessage = "Warning! The first dish is not in its category.";
-                    break;
-                case 2:
-                    errorMessage = "Warning! The main course is not in its category.";
-                    break;
-                case 3:
-                    errorMessage = "Warning! The dessert is not in its category.";
-                    break;
-                default:
-                    errorMessage = "Warning! There is a dish that is not in its category.";
-                    break;
-            }
-            throw new ApplicationError(errorMessage);
-        }
+        const validCategory = await strapi
+            .service(DAYLE_SERVE)
+            .validateCategory(params);
+        handleCategoryError(validCategory);
     },
 };
 const getId = (field) => {
@@ -149,4 +90,24 @@ const getId = (field) => {
     if (typeof field === "object" && field.id)
         return field.id;
     return null;
+};
+const handleCategoryError = (validCategory) => {
+    if (!validCategory.isValid) {
+        let errorMessage = "";
+        switch (validCategory.errorCode) {
+            case 1:
+                errorMessage = "Warning! The first dish is not in its category.";
+                break;
+            case 2:
+                errorMessage = "Warning! The main course is not in its category.";
+                break;
+            case 3:
+                errorMessage = "Warning! The dessert is not in its category.";
+                break;
+            default:
+                errorMessage = "Warning! There is a dish empty.";
+                break;
+        }
+        throw new ApplicationError(errorMessage);
+    }
 };
