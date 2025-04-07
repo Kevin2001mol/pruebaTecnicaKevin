@@ -60,25 +60,32 @@ exports.default = strapi_1.factories.createCoreController(DAILYSERVE, () => ({
                 },
             },
         });
-        const dishCountMap = new Map();
-        for (let i = 0; i < collections.length; i++) {
-            const menu = collections[i];
-            if (menu.First && menu.First.Name) {
-                const dishName = menu.First.Name;
-                dishCountMap.set(dishName, (dishCountMap.get(dishName) || 0) + 1);
-            }
-            if (menu.MainCourse && menu.MainCourse.Name) {
-                const dishName = menu.MainCourse.Name;
-                dishCountMap.set(dishName, (dishCountMap.get(dishName) || 0) + 1);
-            }
-            if (menu.Dessert && menu.Dessert.Name) {
-                const dishName = menu.Dessert.Name;
-                dishCountMap.set(dishName, (dishCountMap.get(dishName) || 0) + 1);
-            }
-        }
-        const sortedDishes = Array.from(dishCountMap.entries())
-            .sort((a, b) => b[1] - a[1])
-            .map(([name, count]) => ({ name, count }));
-        return { popularDishes: sortedDishes };
+        const dishCountMap = getDishCountMap(collections);
+        return getSortedDishes(dishCountMap);
     },
 }));
+function getDishCountMap(collections) {
+    const dishCountMap = new Map();
+    for (let i = 0; i < collections.length; i++) {
+        const menu = collections[i];
+        if (menu.First && menu.First.Name) {
+            const dishName = menu.First.Name;
+            dishCountMap.set(dishName, (dishCountMap.get(dishName) || 0) + 1);
+        }
+        if (menu.MainCourse && menu.MainCourse.Name) {
+            const dishName = menu.MainCourse.Name;
+            dishCountMap.set(dishName, (dishCountMap.get(dishName) || 0) + 1);
+        }
+        if (menu.Dessert && menu.Dessert.Name) {
+            const dishName = menu.Dessert.Name;
+            dishCountMap.set(dishName, (dishCountMap.get(dishName) || 0) + 1);
+        }
+    }
+    return dishCountMap;
+}
+function getSortedDishes(dishCountMap) {
+    const sortedDishes = Array.from(dishCountMap.entries())
+        .sort((a, b) => b[1] - a[1])
+        .map(([name, count]) => ({ name, count }));
+    return { popularDishes: sortedDishes };
+}
