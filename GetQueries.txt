@@ -2,3 +2,7 @@
 http://localhost:1337/api/daily-menus?[fields][0]=Price&[populate][Dessert]=true
 -Filtrar menús por rango de precios (GET /menus?min_precio=10&max_precio=15).
 http://localhost:1337/api/daily-menus?filters[Price][$gte]=10&filters[Price][$lte]=15
+-Filtrar menús sin ciertos alérgenos
+http://localhost:1337/api/daily-menu/Gluten
+-Obtener los platos más vendidos o populares
+http://localhost:1337/api/daily-menu/

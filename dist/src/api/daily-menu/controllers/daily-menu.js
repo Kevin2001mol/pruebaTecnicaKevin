@@ -12,7 +12,6 @@ exports.default = strapi_1.factories.createCoreController(DAILYSERVE, () => ({
             return ctx.badRequest("Debe proporcionar al menos un nombre de alérgeno.");
         }
         const namesArray = Name.split(",").map((name) => name.trim());
-        //convertir en funcion obtainDishes();
         const dailyMenus = await strapi.documents(DAILYSERVE).findMany({
             populate: {
                 First: {
@@ -32,7 +31,6 @@ exports.default = strapi_1.factories.createCoreController(DAILYSERVE, () => ({
                 },
             },
         });
-        // hacer funcion menuFilter()
         const filteredMenus = dailyMenus.filter((menu) => {
             const dishHasProhibitedAllergen = (dish) => {
                 if (!dish)
@@ -46,11 +44,9 @@ exports.default = strapi_1.factories.createCoreController(DAILYSERVE, () => ({
             const dessertHas = dishHasProhibitedAllergen(menu.Dessert);
             return !firstHas && !mainCourseHas && !dessertHas;
         });
-        //hasta aqui diria 
         return ctx.send(filteredMenus);
     },
     async mostPopulars(ctx) {
-        // otra funcion nameDishes()
         const collections = await strapi.documents(DAILYSERVE).findMany({
             populate: {
                 First: {
@@ -64,7 +60,6 @@ exports.default = strapi_1.factories.createCoreController(DAILYSERVE, () => ({
                 },
             },
         });
-        //va metiendo counts es un mapa y hacerlo en funcion tmbn  countDishes()
         const dishCountMap = new Map();
         for (let i = 0; i < collections.length; i++) {
             const menu = collections[i];
@@ -81,10 +76,9 @@ exports.default = strapi_1.factories.createCoreController(DAILYSERVE, () => ({
                 dishCountMap.set(dishName, (dishCountMap.get(dishName) || 0) + 1);
             }
         }
-        // funcion para ordenar e intentar simplificarla dishesSorter();
         const sortedDishes = Array.from(dishCountMap.entries())
-            .sort((a, b) => b[1] - a[1]) //ORDEN DE MAYOR A MENOR(SI LA RESTA DA NEGATIVO , LO ORDENA A LA INVERSD Y SI NO ASI )
-            .map(([name, count]) => ({ name, count })); //CONVERTIR EN OBJ CON ATT DE NOMBRE Y CONTADOR 
+            .sort((a, b) => b[1] - a[1])
+            .map(([name, count]) => ({ name, count }));
         return { popularDishes: sortedDishes };
     },
 }));
